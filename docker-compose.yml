@@ -1,0 +1,113 @@
+version: '3'
+
+services:
+  nginx:
+    build: ./nginx
+    tty: true
+    ports:
+      - "80:80"
+      # - "8080:8080"
+      # - "443:443"
+    volumes:
+      - ${WORKSPACES}:/www/:rw,cached
+      - ./sock/:/sock/:rw,cached
+      - ./conf/nginx/:/usr/local/nginx/conf/:ro,cached
+      - ./log/:/log/:rw,cached
+    links:
+      - php72:fpm72
+    #   # - php56:fpm56
+    environment:
+      - TZ=Asia/Shanghai
+    container_name: nginx
+    networks:
+      docker_net:
+        ipv4_address: ${NGINX_IP}
+
+  php72:
+    build: ./php/php72
+    expose:
+      - "9000"
+    volumes:
+      - ${WORKSPACES}:/www/:rw,cached
+      - ./conf/php/:/usr/local/php/etc/:rw,cached
+      - ./sock/:/sock/:rw,cached
+      - ./log/:/log/:rw,cached
+    links:
+      - mysql:mysql
+      - memcached:memcached
+      - redis:redis
+    container_name: php72
+    networks:
+      docker_net:
+        ipv4_address: ${PHP72_IP}
+
+  go:
+    build: ./go/
+    ports:
+      - "9088:8088"
+    volumes:
+      - ../../Go/:/www/:rw,cached
+      - ./sock/:/sock/:rw,cached
+      - ./log/:/log/:rw,cached
+    links:
+      - mysql:mysql
+      - redis:redis
+    container_name: golang
+    networks:
+      docker_net:
+        ipv4_address: ${GOLANG_IP}
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ${WORKSPACES}:/www/:rw,cached
+      - ./conf/mysql/my.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:ro,cached
+      - ./sock/:/sock/:rw,cached
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    container_name: mysql57
+    networks:
+      docker_net:
+        ipv4_address: ${MYSQL_IP}
+  
+  memcached:
+    build: ./memcached
+    ports:
+      - "11211:11211"
+    container_name: memcached
+    networks:
+      docker_net:
+        ipv4_address: ${MEMCACHED_IP}
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: redis
+    networks:
+      docker_net:
+        ipv4_address: ${REDIS_IP}
+
+  portainer:
+    image: portainer/portainer
+    ports:
+      - "9000:9000"
+    volumes:
+      - ${WORKSPACES}:/www/:rw,cached
+      - /var/run/docker.sock:/var/run/docker.sock:cached
+    #   - ../portainer/:/data:cached
+    container_name: portainer
+    networks:
+      docker_net:
+        ipv4_address: ${PORTAINER_IP}
+
+networks:
+  docker_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: "${DOCKER_SUBNET}"
