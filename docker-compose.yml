@@ -56,6 +56,21 @@ services:
     networks:
       docker_net:
         ipv4_address: ${GOLANG_IP}
+  vue:
+    build: ./vue/
+    ports:
+      - "8201:8201"
+    volumes:
+      - ../../Www/:/www/:rw,cached
+      - ./sock/:/sock/:rw,cached
+      - ./log/:/log/:rw,cached
+    links:
+      - mysql:mysql
+      - redis:redis
+    container_name: vue
+    networks:
+      docker_net:
+        ipv4_address: ${VUE_IP}
 
   mysql:
     image: mysql:5.7
