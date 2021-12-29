@@ -46,7 +46,7 @@ services:
     ports:
       - "9088:8088"
     volumes:
-      - ../../Go/:/www/:rw,cached
+      - ../Go/:/www/:rw,cached
       - ./sock/:/sock/:rw,cached
       - ./log/:/log/:rw,cached
     links:
@@ -56,24 +56,24 @@ services:
     networks:
       docker_net:
         ipv4_address: ${GOLANG_IP}
-  vue:
-    build: ./vue/
-    ports:
-      - "8201:8201"
-    volumes:
-      - ../../Www/:/www/:rw,cached
-      - ./sock/:/sock/:rw,cached
-      - ./log/:/log/:rw,cached
-    links:
-      - mysql:mysql
-      - redis:redis
-    container_name: vue
-    networks:
-      docker_net:
-        ipv4_address: ${VUE_IP}
+  # vue:
+  #   build: ./vue/
+  #   ports:
+  #     - "8201:8201"
+  #   volumes:
+  #     - ../../Www/:/www/:rw,cached
+  #     - ./sock/:/sock/:rw,cached
+  #     - ./log/:/log/:rw,cached
+  #   links:
+  #     - mysql:mysql
+  #     - redis:redis
+  #   container_name: vue
+  #   networks:
+  #     docker_net:
+  #       ipv4_address: ${VUE_IP}
 
   mysql:
-    image: mysql:5.7
+    image: mysql/mysql-server:5.7
     ports:
       - "3306:3306"
     volumes:
