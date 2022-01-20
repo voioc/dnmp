@@ -14,7 +14,7 @@ services:
       - ./conf/nginx/:/usr/local/nginx/conf/:ro,cached
       - ./log/:/log/:rw,cached
     links:
-      - php72:fpm72
+      - php:fpm
     #   # - php56:fpm56
     environment:
       - TZ=Asia/Shanghai
@@ -23,8 +23,8 @@ services:
       docker_net:
         ipv4_address: ${NGINX_IP}
 
-  php72:
-    build: ./php/php72
+  php:
+    build: ./php
     expose:
       - "9000"
     volumes:
@@ -36,10 +36,10 @@ services:
       - mysql:mysql
       - memcached:memcached
       - redis:redis
-    container_name: php72
+    container_name: php
     networks:
       docker_net:
-        ipv4_address: ${PHP72_IP}
+        ipv4_address: ${PHP_IP}
 
   go:
     build: ./go/

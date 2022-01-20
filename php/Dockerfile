@@ -6,17 +6,17 @@ RUN yum -y install wget \
     # && cd /etc/yum.repos.d && mv CentOS-Base.repo CentOS-Base.repo.bak && wget -O CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo && yum clean all && yum clean metadata && yum clean dbcache && yum makecache \
     && yum -y install epel-release \
     && yum -y update \
-    && yum -y install autoconf gcc gcc-c++ make libxml2 libxml2-devel openssl openssl-devel bzip2 bzip2-devel libcurl libcurl-devel libjpeg libjpeg-devel libpng libpng-devel freetype freetype-devel gmp gmp-devel libmcrypt-devel readline readline-devel libxslt libxslt-devel \
+    && yum -y install wget libxslt-devel vim gcc gcc-c++ make libxml2 libxml2-devel krb5-devel openssl-devel sqlite-devel bzip2 bzip2-devel libcurl-devel gmp-devel oniguruma-devel readline-devel expat-devel autoconf \
     && mkdir /www /log /sock \
     && groupadd www \
     && useradd -s /sbin/nologin -g www www \
     && chown -R www:www /www /log /sock \
-    && cd /tmp/ && wget https://sourceforge.net/projects/re2c/files/0.16/re2c-0.16.tar.gz && tar -zxvf re2c-0.16.tar.gz && cd re2c-0.16 && ./configure && make && make install \
-    && cd /tmp/ && wget http://ftp.gnu.org/gnu/bison/bison-3.8.2.tar.gz && tar -zxvf bison-3.8.2.tar.gz && cd bison-3.8.2 && ./configure && make && make install \
-    && cd /tmp/ && wget http://cn2.php.net/distributions/php-7.2.21.tar.gz \
-    && tar zxvf php-7.2.21.tar.gz \
-    && cd php-7.2.21 \
-    && ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/etc/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-inline-optimization  --disable-debug  --disable-rpath  --enable-shared   --enable-soap  --with-libxml-dir  --with-xmlrpc  --with-openssl --with-mhash  --with-pcre-regex --with-sqlite3  --with-zlib  --enable-bcmath  --with-iconv  --with-bz2  --enable-calendar  --with-curl  --with-cdb  --enable-dom  --enable-exif  --enable-fileinfo  --enable-filter  --with-pcre-dir  --enable-ftp  --with-gd  --with-openssl-dir  --with-jpeg-dir  --with-png-dir  --with-zlib-dir   --with-freetype-dir --enable-gd-jis-conv  --with-gettext  --with-gmp  --with-mhash  --enable-json  --enable-mbstring  --enable-mbregex  --enable-mbregex-backtrack  --with-libmbfl  --with-onig  --enable-pdo  --with-mysqli=mysqlnd  --with-pdo-mysql=mysqlnd  --with-zlib-dir  --with-pdo-sqlite  --with-readline  --enable-session  --enable-shmop  --enable-simplexml  --enable-sockets   --enable-sysvmsg  --enable-sysvsem  --enable-sysvshm  --enable-wddx  --with-libxml-dir  --with-xsl  --enable-zip  --enable-mysqlnd-compression-support  --with-pear  --enable-opcache \
+    && cd /tmp/ && wget --no-check-certificate https://libzip.org/download/libzip-1.3.2.tar.gz && tar -zxvf libzip-1.3.2.tar.gz && cd libzip-1.3.2 && ./configure && make && make install && export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig \
+    && cd /tmp/ && wget --no-check-certificate https://ftp.exim.org/pub/pcre/pcre2-10.35.tar.gz && tar -zxvf pcre2-10.35.tar.gz && cd pcre2-10.35 && ./configure --enable-pcre2-16 --enable-pcre2-32 --enable-jit --enable-jit-sealloc && make && make install && export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/ \
+    && cd /tmp/ && wget http://cn2.php.net/distributions/php-7.3.33.tar.gz \
+    && tar zxvf php-7.3.33.tar.gz \
+    && cd php-7.3.33 \
+    && ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-inline-optimization  --enable-shared   --enable-soap --with-expat --with-xmlrpc  --with-openssl --with-kerberos --with-external-pcre --with-pcre-jit --with-zlib  --enable-bcmath  --with-iconv  --with-bz2  --enable-calendar  --with-curl  --with-cdb  --enable-dom  --enable-exif  --enable-fileinfo  --enable-filter --enable-ftp --with-openssl-dir --with-freetype --enable-gd-jis-conv  --with-gettext  --with-gmp  --with-mhash  --enable-json  --enable-mbstring  --enable-mbregex --enable-pdo  --with-mysqli=mysqlnd  --with-pdo-mysql=mysqlnd --with-readline  --enable-session  --enable-shmop  --enable-simplexml  --enable-sockets --with-xsl  --with-zip  --enable-mysqlnd-compression-support  --with-pear  --enable-opcache \
     && make -j 4 \
     && make install \
     && cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf \
