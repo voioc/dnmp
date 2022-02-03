@@ -88,7 +88,7 @@ services:
         ipv4_address: ${MYSQL_IP}
   
   memcached:
-    build: ./memcached
+    image: memcached:latest
     ports:
       - "11211:11211"
     container_name: memcached

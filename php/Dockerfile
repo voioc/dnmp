@@ -5,18 +5,20 @@ FROM centos:7
 RUN yum -y install wget \
     # && cd /etc/yum.repos.d && mv CentOS-Base.repo CentOS-Base.repo.bak && wget -O CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo && yum clean all && yum clean metadata && yum clean dbcache && yum makecache \
     && yum -y install epel-release \
-    && yum -y update \
-    && yum -y install wget libxslt-devel vim gcc gcc-c++ make libxml2 libxml2-devel krb5-devel openssl-devel sqlite-devel bzip2 bzip2-devel libcurl-devel gmp-devel oniguruma-devel readline-devel expat-devel autoconf \
+    && yum -y --exclude=kernel* update  \
+    && yum groupinstall -y 'Development Tools' \
+    && yum -y install wget vim gcc gcc-c++ make openssl-devel bzip2-devel libffi-devel  sqlite-devel vim gpm-libs oniguruma oniguruma-devel libsodium libsodium-devel xz-devel libxml2-devel libcurl-devel bash-completion bash-completion-extras libicu-devel libjpeg libjpeg-devel  nss_ldap cmake  boost-devel libevent libevent-devel gd gd-devel openjpeg-devel libgcrypt-devel libpng-devel libgpg-error-devel libxslt-devel cmake libmcrypt-devel libmcrypt recode-devel recode autoconf \
     && mkdir /www /log /sock \
     && groupadd www \
     && useradd -s /sbin/nologin -g www www \
     && chown -R www:www /www /log /sock \
+    && cd /tmp/ && wget https://github.com/libgd/libgd/releases/download/gd-2.3.1/libgd-2.3.1.tar.gz && tar -zxvf libgd-2.3.1.tar.gz && cd libgd-2.3.1 && ./configure && make && make install && export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig \
     && cd /tmp/ && wget --no-check-certificate https://libzip.org/download/libzip-1.3.2.tar.gz && tar -zxvf libzip-1.3.2.tar.gz && cd libzip-1.3.2 && ./configure && make && make install && export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig \
-    && cd /tmp/ && wget --no-check-certificate https://ftp.exim.org/pub/pcre/pcre2-10.35.tar.gz && tar -zxvf pcre2-10.35.tar.gz && cd pcre2-10.35 && ./configure --enable-pcre2-16 --enable-pcre2-32 --enable-jit --enable-jit-sealloc && make && make install && export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/ \
-    && cd /tmp/ && wget http://cn2.php.net/distributions/php-7.3.33.tar.gz \
-    && tar zxvf php-7.3.33.tar.gz \
-    && cd php-7.3.33 \
-    && ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-inline-optimization  --enable-shared   --enable-soap --with-expat --with-xmlrpc  --with-openssl --with-kerberos --with-external-pcre --with-pcre-jit --with-zlib  --enable-bcmath  --with-iconv  --with-bz2  --enable-calendar  --with-curl  --with-cdb  --enable-dom  --enable-exif  --enable-fileinfo  --enable-filter --enable-ftp --with-openssl-dir --with-freetype --enable-gd-jis-conv  --with-gettext  --with-gmp  --with-mhash  --enable-json  --enable-mbstring  --enable-mbregex --enable-pdo  --with-mysqli=mysqlnd  --with-pdo-mysql=mysqlnd --with-readline  --enable-session  --enable-shmop  --enable-simplexml  --enable-sockets --with-xsl  --with-zip  --enable-mysqlnd-compression-support  --with-pear  --enable-opcache \
+    && cd /tmp/ && wget --no-check-certificate https://ftp.exim.org/pub/pcre/pcre2-10.36.tar.gz && tar -zxvf pcre2-10.36.tar.gz && cd pcre2-10.36 && ./configure --enable-pcre2-16 --enable-pcre2-32 --enable-jit --enable-jit-sealloc && make && make install && export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/ \
+    && cd /tmp/ && wget http://cn2.php.net/distributions/php-7.4.27.tar.gz \
+    && tar zxvf php-7.4.27.tar.gz \
+    && cd php-7.4.27 && sed -ie '504s/1/0/g' Zend/zend_operators.h \
+    && ./configure --prefix=/usr/local/php  --with-config-file-path=/usr/local/php/etc  --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --enable-pdo --with-zlib --enable-xml --enable-session --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization --with-curl --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-zip --with-ffi --with-zlib-dir --with-openssl --enable-gd --with-openssl --with-mhash --enable-sockets --with-xmlrpc --enable-soap --with-gettext --enable-fileinfo --enable-opcache --enable-maintainer-zts --with-xsl --with-sodium --enable-tokenizer \ 
     && make -j 4 \
     && make install \
     && cp /usr/local/php/etc/php-fpm.conf.default /usr/local/php/etc/php-fpm.conf \
@@ -31,6 +33,11 @@ RUN yum -y install wget \
     && make clean && make distclean \
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer \
     && rm -rf /tmp/php* \
+    # # opcache 扩展
+    # && cd /tmp && wget https://pecl.php.net/get/zendopcache-7.0.5.tgz && tar -zxvf zendopcache-7.0.5.tgz \ 
+    # && cd zendopcache-7.0.5 && /usr/local/php/bin/phpize && ./configure --with-php-config=/usr/local/php/bin/php-config && make && make install \
+    # && cd /tmp && rm -rf zendopcache* \
+
     # memcached 扩展
     && cd /tmp && wget https://launchpad.net/libmemcached/1.0/1.0.18/+download/libmemcached-1.0.18.tar.gz \
     && tar -zxvf libmemcached-1.0.18.tar.gz && cd libmemcached-1.0.18 && ./configure --prefix=/usr/local/libmemcached --with-memcached && make && make install && make clean \
